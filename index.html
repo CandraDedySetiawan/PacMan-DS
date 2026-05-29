@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PacMan DS</title>
+  <title>PacMan-DS</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
   <style>
     body { margin: 0; padding: 0; background-color: #111; display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; overflow: hidden; touch-action: none; }
@@ -12,7 +12,7 @@
 </head>
 <body>
 <script>
-  
+
 let tileSize = 20; 
 let cols = 28;
 let rows = 15;
@@ -60,7 +60,7 @@ function setup() {
 function draw() {
   background(0);
   if (gameState === 0) { 
-    drawPetaGaris(); drawHUD(); showOverlay("PacMan DS", color(255), "Ketuk untuk Mulai");
+    drawPetaGaris(); drawHUD(); showOverlay("PacMan-DS", color(255), "Click Play to Start");
   } else if (gameState === 1) { 
     playGame();
   } else if (gameState === 2) { 
@@ -68,7 +68,7 @@ function draw() {
     for (let g of ghosts) g.draw();
     drawHUD(); drawDeathEffect(); 
   } else if (gameState === 3) { 
-    drawPetaGaris(); drawHUD(); showOverlay("GAME OVER", color(255, 0, 0), "Ketuk untuk Main Lagi");
+    drawPetaGaris(); drawHUD(); showOverlay("GAME OVER", color(255, 0, 0), "Click to Play Again");
   } else if (gameState === 4) { 
     drawPetaGaris(); drawHUD(); showOverlay("YOU WIN!", color(0, 255, 0), "Score " + score);
   }
