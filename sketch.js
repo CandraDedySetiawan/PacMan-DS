@@ -1,34 +1,17 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<<<<<<< HEAD
-  <title>Dedy Pacman</title>
-=======
-  <title>PacMan DS</title>
->>>>>>> 06b2bed (up game)
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
-  <style>
-    body { margin: 0; padding: 0; background-color: #111; display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; overflow: hidden; touch-action: none; }
-    canvas { max-width: 100%; max-height: 100%; width: auto !important; height: auto !important; object-fit: contain; }
-  </style>
-</head>
-<body>
-<script>
-// --- SEMUA KODE GAME MASUK DI SINI ---
 let tileSize = 20; 
 let cols = 28;
 let rows = 15;
-let levelMap; 
+let map;
 
 let pac;
 let score = 0;
 let lives = 3;
 let cherry;
+
 let foods = [];
 let ghosts = [];
 
+// Game States: 0=Menu, 1=Playing, 2=Dying, 3=GameOver, 4=Win
 let gameState = 0; 
 let deathAnimationTimer = 0; 
 
@@ -38,23 +21,22 @@ const GHOST_CHASE = 2;
 
 let touchStartX = 0, touchStartY = 0;
 
-// PETA D-E-D-Y FINAL
-// (Teleport diapit blok neon solid atas/bawah, sejajar dengan kotak hantu!)
-levelMap = [
+// PETA D-E-D-Y (Sudah Dilubangi di bagian tengah huruf D agar titiknya bisa dimakan!)
+map = [
   [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], 
   [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0, 1,1,1,0, 0, 1,1,1,1, 0, 1,1,1,0, 0, 1,0,0,1, 0,0,0,0,1], 
-  [1,0,0,0, 1,2,1,1, 0, 1,0,0,0, 0, 1,2,1,1, 0, 1,0,0,1, 0,0,0,0,1], 
-  [1,0,0,0, 1,2,2,1, 0, 1,1,1,0, 0, 1,2,2,1, 0, 1,1,1,1, 0,0,0,0,1], 
-  [1,0,0,0, 1,2,1,1, 0, 1,0,0,0, 0, 1,2,1,1, 0, 0,1,1,0, 0,0,0,0,1], 
-  [1,0,0,0, 1,1,1,0, 0, 1,1,1,1, 0, 1,1,1,0, 0, 0,1,1,0, 0,0,0,0,1], 
+  [1,0, 1,1,1,0, 0, 1,1,1,1, 0, 0, 1,1,1,0, 0, 1,0,0,0,1, 0,0,0,0,1], 
+  [1,0, 1,0,0,1, 0, 1,0,0,0, 0, 0, 1,0,0,1, 0, 1,0,0,0,1, 0,0,0,0,1], 
+  [1,0, 1,0,0,0, 0, 1,1,1,0, 0, 0, 1,0,0,0, 0, 0,1,1,1,0, 0,0,0,0,1], // <-- PINTU HURUF D ADA DI BARIS INI
+  [1,0, 1,0,0,1, 0, 1,0,0,0, 0, 0, 1,0,0,1, 0, 0,0,1,0,0, 0,0,0,0,1], 
+  [1,0, 1,1,1,0, 0, 1,1,1,1, 0, 0, 1,1,1,0, 0, 0,0,1,0,0, 0,0,0,0,1], 
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,1,1,1,1,0,1,1,1,0,1,1,3,3,1,1,0,1,1,1,0,1,1,1,1,1,1,1], 
+  [2,2,2,2,2,0,1,2,2,2,1,2,2,2,2,1,2,2,2,1,0,2,2,2,2,2,2,2], 
+  [1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1], 
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1], 
   [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], 
-  [1,1,1,1,1,0,1,1,1,0,1,1,3,3,1,1,0,1,1,1,0,1,1,1,1,1,1,1], // Atap Terowongan
-  [0,0,0,0,0,0,1,1,1,0,1,2,2,2,2,1,0,1,1,1,0,0,0,0,0,0,0,0], // <-- JALUR TELEPORT (Sejajar Hantu)
-  [1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,1,1], // Lantai Terowongan
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], 
-  [1,0, 1,1,1, 0, 1,1,1,1, 0, 1,1,1,1,1,1, 0, 1,1,1,1, 0, 1,1,1, 0, 1], 
-  [1,0, 0,0,0, 0, 0,1,1,0, 0, 0,0,1,1,0,0, 0, 0,1,1,0, 0, 0,0,0, 0, 1], 
   [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]  
 ];
 
@@ -65,12 +47,9 @@ function setup() {
 
 function draw() {
   background(0);
+  
   if (gameState === 0) { 
-<<<<<<< HEAD
     drawPetaGaris(); drawHUD(); showOverlay("DEDY PAC-MAN", color(255), "Ketuk untuk Mulai");
-=======
-    drawPetaGaris(); drawHUD(); showOverlay("PacMan DS", color(255), "Ketuk untuk Mulai");
->>>>>>> 06b2bed (up game)
   } else if (gameState === 1) { 
     playGame();
   } else if (gameState === 2) { 
@@ -80,36 +59,50 @@ function draw() {
   } else if (gameState === 3) { 
     drawPetaGaris(); drawHUD(); showOverlay("GAME OVER", color(255, 0, 0), "Ketuk untuk Main Lagi");
   } else if (gameState === 4) { 
-    drawPetaGaris(); drawHUD(); showOverlay("YOU WIN!", color(0, 255, 0), "Score " + score);
+    drawPetaGaris(); drawHUD(); showOverlay("YOU WIN!", color(0, 255, 0), "Score: " + score);
   }
 }
 
 function playGame() {
-  drawPetaGaris(); drawMakanan(); checkFoodCollision();
-  pac.update(); pac.draw();
+  drawPetaGaris();
+  drawMakanan();
+  checkFoodCollision();
+
+  pac.update();
+  pac.draw();
+
   for (let g of ghosts) {
-    g.update(); g.draw();
+    g.update();
+    g.draw();
     if (dist(pac.x, pac.y, g.x, g.y) < tileSize * 0.7) handleLifeLost();
   }
+
   if (cherry) {
     cherry.draw();
-    if (dist(pac.x, pac.y, cherry.x, cherry.y) < tileSize * 0.8) { 
-      score += 100; 
-      lives++; 
-      cherry = null; 
+    if (dist(pac.x, pac.y, cherry.x, cherry.y) < tileSize * 0.8) {
+      score += 100; cherry = null; 
     }
   }
+
   drawHUD();
   if (foods.length === 0) gameState = 4;
 }
 
 function drawPetaGaris() {
   strokeCap(ROUND); strokeJoin(ROUND); noFill();
-  stroke(0, 0, 150); strokeWeight(12); drawTembokLines();
-  stroke(0, 100, 255); strokeWeight(6); drawTembokLines();
+
+  // Garis Glow (Luar)
+  stroke(0, 0, 150); strokeWeight(12);
+  drawTembokLines();
+
+  // Garis Inti (Dalam)
+  stroke(0, 100, 255); strokeWeight(6);
+  drawTembokLines();
+
+  // Gerbang Pink
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      if (levelMap[r][c] === 3) {
+      if (map[r][c] === 3) {
         stroke(255, 184, 255); strokeWeight(5);
         line(c * tileSize, r * tileSize + tileSize/2, c * tileSize + tileSize, r * tileSize + tileSize/2);
       }
@@ -120,10 +113,11 @@ function drawPetaGaris() {
 function drawTembokLines() {
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      if (levelMap[r][c] === 1) {
-        let cx = c * tileSize + tileSize / 2; let cy = r * tileSize + tileSize / 2;
-        if (c + 1 < cols && levelMap[r][c + 1] === 1) line(cx, cy, cx + tileSize, cy);
-        if (r + 1 < rows && levelMap[r + 1][c] === 1) line(cx, cy, cx, cy + tileSize);
+      if (map[r][c] === 1) {
+        let cx = c * tileSize + tileSize / 2;
+        let cy = r * tileSize + tileSize / 2;
+        if (c + 1 < cols && map[r][c + 1] === 1) line(cx, cy, cx + tileSize, cy);
+        if (r + 1 < rows && map[r + 1][c] === 1) line(cx, cy, cx, cy + tileSize);
       }
     }
   }
@@ -136,26 +130,33 @@ function drawMakanan() {
 
 function checkFoodCollision() {
   for (let i = foods.length - 1; i >= 0; i--) {
-    if (dist(pac.x, pac.y, foods[i].x, foods[i].y) < tileSize / 2) { foods.splice(i, 1); score += 10; }
+    if (dist(pac.x, pac.y, foods[i].x, foods[i].y) < tileSize / 2) {
+      foods.splice(i, 1); score += 10;
+    }
   }
 }
 
 function keyPressed() {
+  // Tetap catat arah meskipun sedang animasi mati!
   if (keyCode === UP_ARROW) { pac.nextDirX = 0; pac.nextDirY = -1; }
   if (keyCode === DOWN_ARROW) { pac.nextDirX = 0; pac.nextDirY = 1; }
   if (keyCode === LEFT_ARROW) { pac.nextDirX = -1; pac.nextDirY = 0; }
   if (keyCode === RIGHT_ARROW) { pac.nextDirX = 1; pac.nextDirY = 0; }
+
   if (gameState !== 1 && gameState !== 2) {
     if (gameState === 3 || gameState === 4) resetGame();
     else if (gameState === 0) gameState = 1; 
   }
 }
 
-function touchStarted() { touchStartX = mouseX; touchStartY = mouseY; return false; }
-function touchMoved() { return false; }
+function touchStarted() {
+  touchStartX = mouseX; touchStartY = mouseY; return false; 
+}
 
 function touchEnded() {
   let dx = mouseX - touchStartX; let dy = mouseY - touchStartY;
+  
+  // SIMPAN USAPAN JARI. Jika diusap saat mati, Pacman akan otomatis mematuhi arah ini saat respawn!
   if (abs(dx) > 30 || abs(dy) > 30) {
     if (abs(dx) > abs(dy)) {
       if (dx > 0) { pac.nextDirX = 1; pac.nextDirY = 0; } else { pac.nextDirX = -1; pac.nextDirY = 0; }       
@@ -163,6 +164,7 @@ function touchEnded() {
       if (dy > 0) { pac.nextDirX = 0; pac.nextDirY = 1; } else { pac.nextDirX = 0; pac.nextDirY = -1; }       
     }
   }
+
   if (gameState !== 1 && gameState !== 2) {
     if (gameState === 3 || gameState === 4) resetGame();
     else if (gameState === 0) gameState = 1; 
@@ -177,23 +179,26 @@ function drawHUD() {
   text(nf(score, 2), 20, rows * tileSize + 45); 
   if (cherry) cherry.drawIcon(width - 50, rows * tileSize + 40);
   fill(255, 255, 0);
-  let displayLives = min(lives, 5); 
-  for (let i = 0; i < displayLives; i++) ellipse(width - 100 - i * 30, rows * tileSize + 40, 16, 16);
+  for (let i = 0; i < lives; i++) ellipse(width - 100 - i * 30, rows * tileSize + 40, 16, 16);
 }
 
 function handleLifeLost() {
-  if (gameState === 2) return; 
-  gameState = 2; deathAnimationTimer = 0; lives--;
+  gameState = 2; 
+  deathAnimationTimer = 0; 
+  lives--;
+  // Mengosongkan ingatan lama agar tidak salah jalan
+  pac.nextDirX = 0; pac.nextDirY = 0; 
 }
 
 function drawDeathEffect() {
   deathAnimationTimer++;
+  
   push(); 
-  let progress = deathAnimationTimer / 100;
-  let shakeMag = 5 * (1 - progress);
+  let shakeMag = map(deathAnimationTimer, 0, 100, 5, 0);
   translate(random(-shakeMag, shakeMag), random(-shakeMag, shakeMag));
-  let deathVisualSize = (tileSize * 0.9) + (tileSize * 1.5 * progress);
-  let opacity = 255 * (1 - progress);
+
+  let deathVisualSize = map(deathAnimationTimer, 0, 100, tileSize * 0.9, tileSize * 2);
+  let opacity = map(deathAnimationTimer, 0, 100, 255, 0);
   
   fill(255, 255, 0, opacity); noStroke();
   arc(pac.x, pac.y, deathVisualSize, deathVisualSize, PI, TWO_PI);
@@ -202,14 +207,26 @@ function drawDeathEffect() {
 
   if (deathAnimationTimer > 100) {
     if (lives <= 0) gameState = 3; 
-    else { resetPositions(); gameState = 1; }
+    else { 
+      resetPositions(); 
+      gameState = 1; // Otomatis lanjut tanpa harus tap layar
+    }
   }
 }
 
 function resetPositions() {
-  let memX = pac.nextDirX; let memY = pac.nextDirY;
-  pac.reset(); 
-  if (memX !== 0 || memY !== 0) { pac.nextDirX = memX; pac.nextDirY = memY; }
+  // PENTING: Pindahkan memori usapan yang dilakukan *saat* animasi meledak
+  let memX = pac.nextDirX;
+  let memY = pac.nextDirY;
+  
+  pac.reset(); // Mereset posisi ke titik awal
+
+  // Jika Anda sempat mengusap layar saat Pacman mati, terapkan di sini!
+  if (memX !== 0 || memY !== 0) {
+    pac.nextDirX = memX;
+    pac.nextDirY = memY;
+  }
+
   for (let g of ghosts) g.resetPosition();
 }
 
@@ -220,16 +237,17 @@ function resetGame() {
 
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      if (levelMap[r][c] === 0) foods.push(createVector(c * tileSize + tileSize / 2, r * tileSize + tileSize / 2));
+      if (map[r][c] === 0) foods.push(createVector(c * tileSize + tileSize / 2, r * tileSize + tileSize / 2));
     }
   }
 
-  ghosts.push(new Ghost(11, 9, color(255, 0, 0)));     
-  ghosts.push(new Ghost(12, 9, color(255, 184, 255)));   
-  ghosts.push(new Ghost(13, 9, color(0, 255, 255)));     
-  ghosts.push(new Ghost(14, 9, color(255, 184, 81)));    
+  ghosts.push(new Ghost(12, 9, color(255, 0, 0)));     
+  ghosts.push(new Ghost(13, 9, color(255, 184, 255)));   
+  ghosts.push(new Ghost(14, 9, color(0, 255, 255)));     
+  ghosts.push(new Ghost(15, 9, color(255, 184, 81)));    
 
-  resetPositions(); pac.nextDirX = 0; pac.nextDirY = 0; gameState = 0; 
+  resetPositions();
+  gameState = 0; 
 }
 
 function showOverlay(title, c, subtitle) {
@@ -239,41 +257,55 @@ function showOverlay(title, c, subtitle) {
   fill(255); textSize(20); text(subtitle, width/2, (rows * tileSize)/2 + 40);
 }
 
+// -----------------------------------------
+// PACMAN 
+// -----------------------------------------
 class Pacman {
   constructor() { this.speed = 2; this.reset(); }
   reset() {
-    this.x = 13 * tileSize + tileSize / 2; this.y = 11 * tileSize + tileSize / 2;
-    this.dirX = -1; this.dirY = 0; this.nextDirX = -1; this.nextDirY = 0; 
+    this.x = 13 * tileSize + tileSize / 2; 
+    this.y = 11 * tileSize + tileSize / 2;
+    // OTOMATIS BERJALAN KE KIRI SAAT HIDUP KEMBALI
+    this.dirX = -1; this.dirY = 0; 
+    this.nextDirX = -1; this.nextDirY = 0; 
   }
   update() {
     if (this.nextDirX === -this.dirX && this.nextDirY === -this.dirY && (this.dirX !== 0 || this.dirY !== 0)) {
       this.dirX = this.nextDirX; this.dirY = this.nextDirY;
     }
 
-    let atCenterX = Math.abs((this.x - tileSize/2) % tileSize) === 0;
-    let atCenterY = Math.abs((this.y - tileSize/2) % tileSize) === 0;
+    let atCenterX = (this.x - tileSize/2) % tileSize === 0;
+    let atCenterY = (this.y - tileSize/2) % tileSize === 0;
 
     if (atCenterX && atCenterY) {
-      let col = floor((this.x - tileSize/2) / tileSize); let row = floor((this.y - tileSize/2) / tileSize);
+      let col = (this.x - tileSize/2) / tileSize;
+      let row = (this.y - tileSize/2) / tileSize;
+
       if (this.nextDirX !== 0 || this.nextDirY !== 0) {
         if (!this.isWall(col + this.nextDirX, row + this.nextDirY)) {
           this.dirX = this.nextDirX; this.dirY = this.nextDirY;
         }
       }
-      if (this.dirX === 0 && this.dirY === 0) {} 
-      else if (this.isWall(col + this.dirX, row + this.dirY)) { this.dirX = 0; this.dirY = 0; }
+      
+      if (this.dirX === 0 && this.dirY === 0) {
+        // Biarkan diam jika menabrak awal
+      } else if (this.isWall(col + this.dirX, row + this.dirY)) {
+        this.dirX = 0; this.dirY = 0; 
+      }
     }
-    
+
     this.x += this.dirX * this.speed; this.y += this.dirY * this.speed;
-    
-    if (this.x < 0) this.x = cols * tileSize; 
+
+    if (this.x < 0) this.x = cols * tileSize;
     if (this.x > cols * tileSize) this.x = 0;
   }
+
   isWall(c, r) {
-    if (c < 0 || c >= cols) return false; 
+    if (c < 0 || c >= cols) return false;
     if (r < 0 || r >= rows) return true;
-    return levelMap[r][c] === 1 || levelMap[r][c] === 3;
+    return map[r][c] === 1 || map[r][c] === 3;
   }
+
   draw() {
     push(); translate(this.x, this.y); rotate(atan2(this.dirY, this.dirX));
     let mouthAngle = abs(sin(frameCount * 0.15)) * QUARTER_PI;
@@ -283,66 +315,90 @@ class Pacman {
   }
 }
 
+// -----------------------------------------
+// HANTU 
+// -----------------------------------------
 class Ghost {
   constructor(c_idx, r_idx, colorObj) {
-    this.startCol = c_idx; this.startRow = r_idx; this.c = colorObj; this.speed = 2; this.resetPosition();
+    this.startCol = c_idx; this.startRow = r_idx;
+    this.c = colorObj; this.speed = 2;
+    this.resetPosition();
   }
   resetPosition() {
-    this.x = this.startCol * tileSize + tileSize / 2; this.y = this.startRow * tileSize + tileSize / 2;
-    this.state = GHOST_HOME; this.exitTimer = random(20, 100); this.dirX = 1; this.dirY = 0;
+    this.x = this.startCol * tileSize + tileSize / 2;
+    this.y = this.startRow * tileSize + tileSize / 2;
+    this.state = GHOST_HOME; 
+    this.exitTimer = random(20, 100); 
+    this.dirX = 1; this.dirY = 0;
   }
   update() {
     if (this.state === GHOST_HOME) this.updateHome();
     else if (this.state === GHOST_EXITING) this.updateExiting();
     else this.updateChase();
     
-    if (this.x < 0) this.x = cols * tileSize; 
+    if (this.x < 0) this.x = cols * tileSize;
     if (this.x > cols * tileSize) this.x = 0;
   }
   updateHome() {
     this.exitTimer--;
     if (this.exitTimer > 0) {
-       let atCenter = Math.abs((this.x - tileSize/2) % tileSize) === 0;
+       let atCenter = (this.x - tileSize/2) % tileSize === 0;
        if (atCenter) {
          if (this.isWallHantu(floor(this.x/tileSize) + this.dirX, floor(this.y/tileSize))) this.dirX *= -1;
        }
        this.x += this.dirX * this.speed;
-    } else { this.state = GHOST_EXITING; }
+    } else {
+       this.state = GHOST_EXITING;
+    }
   }
   updateExiting() {
     let doorX = 12 * tileSize + tileSize/2; 
-    if (this.x !== doorX) { this.x += (this.x < doorX) ? this.speed : -this.speed; } 
-    else { this.y -= this.speed; }
+    if (this.x !== doorX) {
+      this.x += (this.x < doorX) ? this.speed : -this.speed;
+    } else {
+      this.y -= this.speed; 
+    }
     if (this.y <= 8 * tileSize + tileSize/2) {
-      this.y = 8 * tileSize + tileSize/2; this.dirX = random() > 0.5 ? 1 : -1; this.dirY = 0; this.state = GHOST_CHASE;
+      this.y = 8 * tileSize + tileSize/2; 
+      this.dirX = random() > 0.5 ? 1 : -1; this.dirY = 0;
+      this.state = GHOST_CHASE;
     }
   }
   updateChase() {
-    let atCenterX = Math.abs((this.x - tileSize/2) % tileSize) === 0;
-    let atCenterY = Math.abs((this.y - tileSize/2) % tileSize) === 0;
+    let atCenterX = (this.x - tileSize/2) % tileSize === 0;
+    let atCenterY = (this.y - tileSize/2) % tileSize === 0;
+
     if (atCenterX && atCenterY) {
-      let col = floor((this.x - tileSize/2) / tileSize); let row = floor((this.y - tileSize/2) / tileSize);
-      let possible = []; let dirs = [[1,0], [-1,0], [0,1], [0,-1]];
+      let col = (this.x - tileSize/2) / tileSize;
+      let row = (this.y - tileSize/2) / tileSize;
+      
+      let possible = [];
+      let dirs = [[1,0], [-1,0], [0,1], [0,-1]];
       for (let d of dirs) {
         if (d[0] === -this.dirX && d[1] === -this.dirY) continue; 
         if (!this.isWallHantu(col + d[0], row + d[1])) possible.push(d);
       }
+
       if (possible.length > 0) {
         let blocked = this.isWallHantu(col + this.dirX, row + this.dirY);
         if (blocked || (possible.length > 1 && random() < 0.25)) {
-          let r = random(possible); this.dirX = r[0]; this.dirY = r[1];
+          let r = random(possible);
+          this.dirX = r[0]; this.dirY = r[1];
         }
-      } else { this.dirX *= -1; this.dirY *= -1; }
+      } else {
+        this.dirX *= -1; this.dirY *= -1; 
+      }
     }
     this.x += this.dirX * this.speed; this.y += this.dirY * this.speed;
   }
   isWallHantu(c, r) {
-    if (c < 0 || c >= cols) return false; 
-    if (r < 0 || r >= rows) return true; 
-    return levelMap[r][c] === 1; 
+    if (c < 0 || c >= cols) return false;
+    if (r < 0 || r >= rows) return true;
+    return map[r][c] === 1; 
   }
   draw() {
-    push(); translate(this.x, this.y); fill(this.c); noStroke();
+    push(); translate(this.x, this.y);
+    fill(this.c); noStroke();
     arc(0, 0, tileSize * 0.9, tileSize * 0.9, PI, TWO_PI);
     rect(-tileSize * 0.45, 0, tileSize * 0.9, tileSize * 0.45, 3);
     fill(255); ellipse(-4, -2, 6, 6); ellipse(4, -2, 6, 6); 
@@ -356,10 +412,8 @@ class Fruit {
   drawIcon(ix, iy) {
     push(); translate(ix, iy); fill(255, 0, 0); noStroke();
     ellipse(-6, 0, 10, 10); ellipse(6, 0, 10, 10);
-    stroke(0, 150, 0); strokeWeight(2); line(0, -5, 0, -15); line(0, -15, -6, -5); line(0, -15, 6, -5);
+    stroke(0, 150, 0); strokeWeight(2);
+    line(0, -5, 0, -15); line(0, -15, -6, -5); line(0, -15, 6, -5);
     pop();
   }
 }
-</script>
-</body>
-</html>
