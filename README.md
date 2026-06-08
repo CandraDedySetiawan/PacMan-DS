@@ -1,2 +1,5 @@
 # PacMan-DS
-CUMA ISENG BIKIN GAME, KEGABUTAN BIKIN GAME
+THIS GAME WEB BASED
+
+PLAYING GAME
+https://candradedysetiawan.github.io/PacMan-DS/
